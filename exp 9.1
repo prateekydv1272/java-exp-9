@@ -1,0 +1,118 @@
+// SpringHibernateDemo.java
+// Demonstration of Spring IoC, Dependency Injection, and Hibernate Integration (Simplified Example)
+
+import java.util.*;
+
+// --- Model Class ---
+class Student {
+    private int id;
+    private String name;
+    private String course;
+
+    public Student() {}
+
+    public Student(int id, String name, String course) {
+        this.id = id;
+        this.name = name;
+        this.course = course;
+    }
+
+    // Getters and setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getCourse() { return course; }
+    public void setCourse(String course) { this.course = course; }
+
+    @Override
+    public String toString() {
+        return "Student{id=" + id + ", name='" + name + "', course='" + course + "'}";
+    }
+}
+
+// --- DAO Layer (Data Access Object) ---
+interface StudentDAO {
+    void saveStudent(Student student);
+    List<Student> getAllStudents();
+}
+
+// --- DAO Implementation (simulating Hibernate operations) ---
+class StudentDAOImpl implements StudentDAO {
+    private final List<Student> database = new ArrayList<>();
+
+    @Override
+    public void saveStudent(Student student) {
+        database.add(student);
+        System.out.println("[Hibernate] Student saved: " + student);
+    }
+
+    @Override
+    public List<Student> getAllStudents() {
+        return database;
+    }
+}
+
+// --- Service Layer (Business Logic) ---
+class StudentService {
+    private StudentDAO studentDAO; // Dependency
+
+    // Setter Injection (used by Spring)
+    public void setStudentDAO(StudentDAO studentDAO) {
+        this.studentDAO = studentDAO;
+    }
+
+    public void addStudent(Student student) {
+        studentDAO.saveStudent(student);
+    }
+
+    public void listStudents() {
+        List<Student> students = studentDAO.getAllStudents();
+        System.out.println("\n--- Student List ---");
+        for (Student s : students) {
+            System.out.println(s);
+        }
+    }
+}
+
+// --- Simulated Spring Container (IoC Container) ---
+class SpringContainer {
+    private final Map<String, Object> beans = new HashMap<>();
+
+    public SpringContainer() {
+        // Create beans and inject dependencies manually (simulating XML-based configuration)
+        StudentDAOImpl studentDAO = new StudentDAOImpl();
+        StudentService studentService = new StudentService();
+        studentService.setStudentDAO(studentDAO);
+
+        beans.put("studentDAO", studentDAO);
+        beans.put("studentService", studentService);
+    }
+
+    public Object getBean(String name) {
+        return beans.get(name);
+    }
+}
+
+// --- Main Application ---
+public class SpringHibernateDemo {
+    public static void main(String[] args) {
+        System.out.println("=== Spring + Hibernate Demo (Simplified) ===");
+
+        // Create IoC container
+        SpringContainer context = new SpringContainer();
+
+        // Get service bean from container
+        StudentService studentService = (StudentService) context.getBean("studentService");
+
+        // Add students
+        studentService.addStudent(new Student(1, "Amit", "Java"));
+        studentService.addStudent(new Student(2, "Priya", "Spring Framework"));
+        studentService.addStudent(new Student(3, "Rohan", "Hibernate ORM"));
+
+        // Display all students
+        studentService.listStudents();
+    }
+}
