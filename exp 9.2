@@ -1,0 +1,44 @@
+@Entity
+@Table(name = "student")
+public class Student {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "name")
+    private String name;
+}
+
+Session session = factory.openSession();
+Transaction tx = session.beginTransaction();
+
+Student s = new Student();
+s.setName("Meghana");
+
+session.save(s);
+tx.commit();
+session.close();
+Session session = factory.openSession();
+Student s = session.get(Student.class, 1);
+System.out.println(s.getName());
+session.close();
+Session session = factory.openSession();
+Transaction tx = session.beginTransaction();
+
+Student s = session.get(Student.class, 1);
+s.setName("Manasa");
+
+session.update(s);
+tx.commit();
+session.close();
+Session session = factory.openSession();
+Transaction tx = session.beginTransaction();
+
+Student s = session.get(Student.class, 1);
+session.delete(s);
+
+tx.commit();
+session.close();
+SessionFactory factory = new Configuration()
+        .configure("hibernate.cfg.xml")
+        .buildSessionFactory();
